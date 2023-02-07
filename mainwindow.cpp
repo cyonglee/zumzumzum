@@ -1,41 +1,313 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "mydataset.h"
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QIODevice>
+#include <QTextStream>
+#include <QDockWidget>
+#include <QFileDialog>
+#include <QString>
 
-#include <QGuiApplication>
-#include <QVulkanInstance>
-#include <QLoggingCategory>
-#include "../shared/trianglerenderer.h"
-
-Q_LOGGING_CATEGORY(lcVk, "qt.vulkan")
-
-class VulkanWindow : public QVulkanWindow
+MainWindow::MainWindow(VulkanWindow *w)
+    : m_window(w)
+    , ui(new Ui::MainWindow)
 {
-public:
-    QVulkanWindowRenderer *createRenderer() override;
-};
+    ui->setupUi(this);
+    QWidget *wrapper = QWidget::createWindowContainer(w);
+    ui->verticalLayout_2->addWidget(wrapper);
+
+    QDockWidget *dockHier = new QDockWidget(tr("Hierarchy"), this);
+    QDockWidget *dockLayer = new QDockWidget(tr("Layer Information"), this);
+    QDockWidget *dockTop = new QDockWidget(tr("GDS View"), this);
+    QDockWidget *dockInfo = new QDockWidget(tr("Camera Information"), this);
+    QDockWidget *dockMap = new QDockWidget(tr("Map"), this);
+
+    dockHier->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockLayer->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockTop->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockInfo->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockMap->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+
+    addDockWidget(Qt::LeftDockWidgetArea, dockHier);
+    addDockWidget(Qt::LeftDockWidgetArea, dockLayer);
+    addDockWidget(Qt::RightDockWidgetArea, dockTop);
+    addDockWidget(Qt::RightDockWidgetArea, dockInfo);
+    addDockWidget(Qt::RightDockWidgetArea, dockMap);
+
+    formHier = new FormHier;
+    formLayer = new FormLayer;
+    formTop = new FormTop;
+    formInfo = new FormInfo;
+    formMap = new FormMap;
+    donut = new MyDataSet;
+
+    dockHier->setWidget(formHier);
+    dockLayer->setWidget(formLayer);
+    dockTop->setWidget(formTop);
+    dockInfo->setWidget(formInfo);
+    dockMap->setWidget(formMap);
+
+
+    //QObject::connect(this, sendInfoValue, formInfo, FormInfo::setPointX);
+    QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), this, SLOT(on_actionOpen_file_triggered));
+    QObject::connect(this, SIGNAL(on_actionOpen_file_triggered), donut, SLOT(file_split));
+    //QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), formHier, SLOT(ReceiveSplitData()));
+
+    //qDebug() << split_data[1][0];
+}
+
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+
+void MainWindow::inputStatus(QString text)
+{
+    for (int i = text.size() ; i < 30 ; i++)
+    {
+        text.append(" ");
+    }
+
+    statusText.prepend(text);
+
+    if (statusText.size() > 120)
+        statusText.remove(120,statusText.size()-120);
+    ui->statusbar->showMessage(statusText);
+}
 
 QVulkanWindowRenderer *VulkanWindow::createRenderer()
 {
-    return new TriangleRenderer(this, true); // try MSAA, when available
+    m_renderer = new VulkanRenderer(this);
+    return m_renderer;
 }
 
-int main(int argc, char *argv[])
+VulkanRenderer::VulkanRenderer(VulkanWindow *w)
+    : TriangleRenderer(w)
 {
-    QGuiApplication app(argc, argv);
+}
 
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
+void VulkanWindow::wheelEvent(QWheelEvent *e)
+{
+    //문제가 하나 있는데...
+    //프로그램이 선택되어 있지 않아도 moveZoom 명령이 나감
+    //근데 Ctrl 은 Vulkan Window 가 선택되었을 때만 됨
+    //moveZoom 을 이 Level 까지 끌고 내려와야 함
+    const float amount = e->angleDelta().y() / 8;
 
-    QVulkanInstance inst;
-    inst.setLayers({ "VK_LAYER_KHRONOS_validation" });
+    if (keyCtrl == true)
+    {
+//      m_rendere->windowZoom(amount);
+        QString funcValue = "windowZoom : " + QString::number(amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+    }
+    else
+    {
+//      m_renderer->moveZoom(amount);
+        QString funcValue = "moveZoom : " + QString::number(amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+    }
+}
 
-    if (!inst.create())
-        qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
+void VulkanWindow::mousePressEvent(QMouseEvent *e)
+{
+    m_mouseButton = e->buttons();
+    m_lastPos = e->pos();
+    qDebug() << m_mouseButton;
+    qDebug() << m_lastPos;
+}
 
-    VulkanWindow w;
-    w.setVulkanInstance(&inst);
+void VulkanWindow::mouseReleaseEvent(QMouseEvent *)
+{
+    m_mouseButton = 0;
+    qDebug() << m_mouseButton;
+}
 
-    w.resize(1024, 768);
-    w.show();
+void VulkanWindow::mouseMoveEvent(QMouseEvent *e)
+{
+    if (m_mouseButton == 0)
+        return;
 
-    return app.exec();
+    int dx = e->pos().x() - m_lastPos.x();
+    int dy = e->pos().y() - m_lastPos.y();
+
+    if (dx)
+    {
+        if (m_mouseButton == 2)
+        {
+//            m_renderer->rotateRenderY(dx / 10.0f);
+            QString funcValue = "rotateRenderX : " + QString::number(dx / 10.0f);
+            emit outputStatus(funcValue);
+            qDebug()<<funcValue;
+        }
+        else if (m_mouseButton == 4)
+        {
+//            m_renderer->moveRenderX(dx / 10.0f);
+            QString funcValue = "moveRenderX : " + QString::number(dx / 10.0f);
+            emit outputStatus(funcValue);
+            qDebug()<<funcValue;
+        }
+    }
+
+    if (dy)
+    {
+        if (m_mouseButton == 2)
+        {
+//            m_renderer->rotateRenderY(dy / 10.0f);
+            QString funcValue = "rotateRenderY : " + QString::number(dy / 10.0f);
+            emit outputStatus(funcValue);
+            qDebug()<<funcValue;
+        }
+        else if (m_mouseButton == 4)
+        {
+//            m_renderer->moveRenderY(dy / 10.0f);
+            QString funcValue = "moveRenderY : " + QString::number(dy / 10.0f);
+            emit outputStatus(funcValue);
+            qDebug()<<funcValue;
+        }
+    }
+}
+
+void VulkanWindow::keyPressEvent(QKeyEvent *e)
+{
+    const float amount = e->modifiers().testFlag(Qt::ShiftModifier) ? 1.0f : 0.1f;
+    QString funcValue;
+    switch (e->key()) {
+    case Qt::Key_Up:
+//        m_renderer->moveGdsY(amount);
+        funcValue = "moveGdsY : " + QString::number(amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_Down:
+//        m_renderer->moveGdsY(-amount);
+        funcValue = "moveGdsY : " + QString::number(-amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_Right:
+//        m_renderer->moveGdsX(-amount);
+        funcValue = "moveGdsX : " + QString::number(amount);
+//        emit sendInfo("moveGdsX", -amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_Left:
+//        m_renderer->moveGdsX(amount);
+        funcValue = "moveGdsX : " + QString::number(-amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_PageUp:
+//        m_renderer->moveGdsZ(amount);
+        funcValue = "moveGdsZ : " + QString::number(amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_PageDown:
+//        m_renderer->moveGdsZ(amount);
+        funcValue = "moveGdsZ : " + QString::number(-amount);
+        emit outputStatus(funcValue);
+        qDebug()<<funcValue;
+        break;
+    case Qt::Key_Control:
+        keyCtrl = true;
+        qDebug() << "Control";
+        break;
+    case Qt::Key_Alt:
+        keyAlt = true;
+        qDebug() << "Alt";
+        break;
+    case Qt::Key_Shift:
+        keyShift = true;
+        qDebug() << "Shift";
+        break;
+    default:
+        break;
+    }
+}
+void VulkanWindow::keyReleaseEvent(QKeyEvent *e)
+{
+    switch (e->key()) {
+    case Qt::Key_Control:
+        keyCtrl = false;
+        qDebug() << "Control off";
+        break;
+    case Qt::Key_Alt:
+        keyAlt = false;
+        qDebug() << "Alt off";
+        break;
+    case Qt::Key_Shift:
+        keyShift = false;
+        qDebug() << "Shift off";
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    if (formHier->isVisible())
+    {
+        formHier->close();
+        formLayer->close();
+        formTop->close();
+        formInfo->close();
+        formMap->close();
+    }
+    else
+    {
+        formHier->show();
+        formLayer->show();
+        formTop->show();
+        formInfo->show();
+        formMap->show();
+    }
+
+}
+
+/*void MainWindow::takeInfoValue(QString infoName, float value)
+{
+    qDebug()<<"takeInfoValue";
+    emit sendInfoValue(value);
+
+
+}
+*/
+
+void MainWindow::on_actionOpen_file_triggered()
+{
+
+    QStringList file_name = QFileDialog::getOpenFileNames(this, "파일 선택","C:\\","Files(*.*)");
+    qDebug() << file_name;
+
+    int row = 0;
+
+    QFile file(file_name);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    QString getLine;
+    QStringList list[100];
+    QTextStream fileStream(&file);
+    QRegExp rx("[,]");
+    while (!fileStream.atEnd()) {
+            getLine.append(fileStream.readLine());
+            getLine.append(",");
+            list[row] << (getLine.split(rx, QString::SkipEmptyParts));
+            for (int column=0;column<17;column++)
+            {
+                split_data[row][column] << list[row][column];
+                //emit sendSplitData(split_data[row][column]);
+                //qDebug() << "row = " << row << split_data[row][column];
+            }
+            row++;
+            getLine.clear();
+    }
+
+
 }
