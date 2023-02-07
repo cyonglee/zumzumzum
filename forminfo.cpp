@@ -1,41 +1,22 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#include "forminfo.h"
+#include "ui_forminfo.h"
+#include <QDebug>
 
-#include <QGuiApplication>
-#include <QVulkanInstance>
-#include <QLoggingCategory>
-#include "../shared/trianglerenderer.h"
-
-Q_LOGGING_CATEGORY(lcVk, "qt.vulkan")
-
-class VulkanWindow : public QVulkanWindow
+FormInfo::FormInfo(QWidget *parent) :
+    QDialog(parent),
+    ui(new Ui::FormInfo)
 {
-public:
-    QVulkanWindowRenderer *createRenderer() override;
-};
-
-QVulkanWindowRenderer *VulkanWindow::createRenderer()
-{
-    return new TriangleRenderer(this, true); // try MSAA, when available
+    ui->setupUi(this);
 }
 
-int main(int argc, char *argv[])
+void FormInfo::setPointX(float value)
 {
-    QGuiApplication app(argc, argv);
+    qDebug()<<"setPointX";
+    pointX = pointX + value;
+    ui->pointX->setText(QString::number(pointX));
+}
 
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
-
-    QVulkanInstance inst;
-    inst.setLayers({ "VK_LAYER_KHRONOS_validation" });
-
-    if (!inst.create())
-        qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
-
-    VulkanWindow w;
-    w.setVulkanInstance(&inst);
-
-    w.resize(1024, 768);
-    w.show();
-
-    return app.exec();
+FormInfo::~FormInfo()
+{
+    delete ui;
 }
