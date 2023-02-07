@@ -1,33 +1,112 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#include "./trianglerenderer.h"
 
-#include <QVector3D>
-#include <QMatrix4x4>
+#include <QMainWindow>
+#include <QVulkanWindow>
+#include <QDockWidget>
+#include "formhier.h"
+#include "formlayer.h"
+#include "formtop.h"
+#include "forminfo.h"
+#include "formmap.h"
 
-class Camera
+#include "mydataset.h"
+
+class VulkanWindow;
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+
+
+class MainWindow : public QMainWindow
 {
+    Q_OBJECT
+
 public:
-    Camera(const QVector3D &pos);
+    MainWindow(VulkanWindow *w);
+    ~MainWindow();
 
-    void yaw(float degrees);
-    void pitch(float degrees);
-    void walk(float amount);
-    void strafe(float amount);
+public slots:
 
-    QMatrix4x4 viewMatrix() const;
+    void inputStatus(QString text);
+    void on_actionOpen_file_triggered();
 
-private:
-    QVector3D m_forward;
-    QVector3D m_right;
-    QVector3D m_up;
-    QVector3D m_pos;
-    float m_yaw;
-    float m_pitch;
-    QMatrix4x4 m_yawMatrix;
-    QMatrix4x4 m_pitchMatrix;
+//    void takeInfoValue(QString infoName, float value);
+
+private slots:
+    void on_pushButton_clicked();
+
+signals:
+    void sendInfoValue(float value);
+    void sendSplitData(QStringList split_data);
+
+public:
+    QVulkanWindow *m_window;
+    Ui::MainWindow *ui;
+    QString statusText;
+    FormHier *formHier;
+    FormLayer *formLayer;
+    FormTop *formTop;
+    FormInfo *formInfo;
+    FormMap *formMap;
+    MyDataSet *donut;
+    QStringList split_data;
+
+
+public:
+    //MyDataSet *dataset = nullptr;
+
+public:
+    //void setMyDataSet(MyDataSet * dataset_){ this->dataset = dataset_;}
+
 };
 
-#endif
+
+
+// Graphics output
+class VulkanRenderer : public TriangleRenderer
+{
+public:
+    VulkanRenderer(VulkanWindow *w);
+};
+
+// Graphics output -> Qt
+class VulkanWindow : public QVulkanWindow
+{
+    Q_OBJECT
+
+public:
+    QVulkanWindowRenderer *createRenderer() override;
+
+
+private:
+    VulkanRenderer *m_renderer;
+    void wheelEvent(QWheelEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+    void keyPressEvent(QKeyEvent *) override;
+    void keyReleaseEvent(QKeyEvent *) override;
+
+    bool keyCtrl = false;
+    bool keyShift = false;
+    bool keyAlt = false;
+
+    int m_mouseButton = 0;
+
+
+    QPoint m_lastPos;
+
+
+signals:
+    void outputStatus(QString funcValue);
+    void sendInfo(QString infoName, float value);
+};
+
+
+
+#endif // MAINWINDOW_H
