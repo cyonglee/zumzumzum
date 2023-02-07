@@ -1,1 +1,3 @@
-adfd
+name,node1,node1_x,node1_y,node1_z_start,node1_z_end,node1_lvl_desc,node2,node2_x,node2_y,node2_z_start,node2_z_end,node2_lvl_desc,value,description,lvl_number,lvl_desc
+R4_1,11,0.18,0.1865,-0.1,-0.09,SUBSTRATE,11:F50,0.18,0.1865,-0.1,-0.09,SUBSTRATE,0.001,$l=0 $w=10.0000,224,NW    ITF=SUBSTRATE
+R4_2,11,0.18,0.1865,-0.1,-0.09,SUBSTRATE,11:F17,0.12,0.1905,-0.1,-0.09,SUBSTRATE,0.001,$l=0.0601 $w=10.0000,224,NW    ITF=SUBSTRATE
