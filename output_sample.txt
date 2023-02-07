@@ -1,3 +1,85 @@
 name,node1,node1_x,node1_y,node1_z_start,node1_z_end,node1_lvl_desc,node2,node2_x,node2_y,node2_z_start,node2_z_end,node2_lvl_desc,value,description,lvl_number,lvl_desc
 R4_1,11,0.18,0.1865,-0.1,-0.09,SUBSTRATE,11:F50,0.18,0.1865,-0.1,-0.09,SUBSTRATE,0.001,$l=0 $w=10.0000,224,NW    ITF=SUBSTRATE
 R4_2,11,0.18,0.1865,-0.1,-0.09,SUBSTRATE,11:F17,0.12,0.1905,-0.1,-0.09,SUBSTRATE,0.001,$l=0.0601 $w=10.0000,224,NW    ITF=SUBSTRATE
+
+
+
+***********************************   mydataset.h
+#ifndef MYDATASET_H
+#define MYDATASET_H
+
+#include <QObject>
+#include <QString>
+#include <QStringList>
+
+namespace Ui{
+class MyDataSet;
+}
+
+class MyDataSet : public QObject
+{
+    Q_OBJECT
+
+public:
+    MyDataSet(QObject *parent = nullptr);
+    ~MyDataSet();
+    //Ui::MyDataSet *ui;
+
+
+//public:
+//   MyDataSet();
+
+//public slots:
+    void file_split(QStringList file_name);
+
+public:
+
+    QString split_datas[100][100];
+    QString netlist[100];
+    QString pexlist[100];
+    QStringList split_data[100][100];
+
+public:
+    void loadNetlistData(QString file_path);
+};
+
+#endif // MYDATASET_H
+
+
+
+
+
+
+
+***********************************   mydataset.cpp
+#include "mydataset.h"
+#include "mainwindow.h"
+#include <QString>
+#include <QTextStream>
+#include <QDebug>
+#include <QFileDialog>
+
+
+
+MyDataSet::MyDataSet(QObject *parent) : QObject(parent)
+{
+    this->split_datas[0][0] = QString("changyong babo!!");
+}
+
+MyDataSet::~MyDataSet()
+{
+    qDebug() << "===== Exit =====";
+}
+
+
+void MyDataSet::file_split(QStringList file_name)
+{
+
+    qDebug() << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
+                                                        // while End
+    //qDebug() << split_data[1][1];
+}
+
+
+
