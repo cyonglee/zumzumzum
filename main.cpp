@@ -1,41 +1,54 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#include "mainwindow.h"
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QVulkanInstance>
-#include <QLoggingCategory>
-#include "../shared/trianglerenderer.h"
-
-Q_LOGGING_CATEGORY(lcVk, "qt.vulkan")
-
-class VulkanWindow : public QVulkanWindow
-{
-public:
-    QVulkanWindowRenderer *createRenderer() override;
-};
-
-QVulkanWindowRenderer *VulkanWindow::createRenderer()
-{
-    return new TriangleRenderer(this, true); // try MSAA, when available
-}
+#include "mydataset.h"
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication app(argc, argv);
-
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
+    QApplication app(argc, argv);
 
     QVulkanInstance inst;
-    inst.setLayers({ "VK_LAYER_KHRONOS_validation" });
+
+#ifndef Q_OS_ANDROID
+    inst.setLayers(QByteArrayList() << "VK_LAYER_LUNARG_standard_validation");
+#else
+    inst.setLayers(QByteArrayList()
+                   << "VK_LAYER_GOOGLE_threading"
+                   << "VK_LAYER_LUNARG_parameter_validation"
+                   << "VK_LAYER_LUNARG_object_tracker"
+                   << "VK_LAYER_LUNARG_core_validation"
+                   << "VK_LAYER_LUNARG_image"
+                   << "VK_LAYER_LUNARG_swapchain"
+                   << "VK_LAYER_GOOGLE_unique_objects");
+#endif
 
     if (!inst.create())
         qFatal("Failed to create Vulkan instance: %d", inst.errorCode());
 
-    VulkanWindow w;
-    w.setVulkanInstance(&inst);
+    VulkanWindow *vulkanWindow = new VulkanWindow;
+    vulkanWindow->setVulkanInstance(&inst);
 
-    w.resize(1024, 768);
-    w.show();
+    MainWindow mainWindow(vulkanWindow);
+
+    //MyDataSet my_data;
+
+    //mainWindow.setMyDataSet(&my_data);
+    //mainWindow.formHier->setMyDataSet(&my_data);
+
+    //qDebug() << "%%%%% " << my_data.split_datas[0][0];
+    //qDebug() << "%%%%% " << mainWindow.dataset->split_datas[0][0];
+    //qDebug()<< "%%%%% before " << mainWindow.formHier->dataset->split_datas[0][0];
+    //mainWindow.formHier->testMyData();
+    //qDebug()<< "%%%%% after " << mainWindow.formHier->dataset->split_datas[0][0];
+
+
+    QObject::connect(vulkanWindow, &VulkanWindow::outputStatus, &mainWindow, &MainWindow::inputStatus);
+    //QObject::connect(vulkanWindow, &VulkanWindow::sendInfo, &mainWindow, &MainWindow::takeInfoValue);
+    mainWindow.resize(1024,768);
+    mainWindow.show();
+
+
 
     return app.exec();
 }
