@@ -1,33 +1,33 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#ifndef FORMHIER_H
+#define FORMHIER_H
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#include <QDialog>
+#include "mydataset.h"
+//#include "mainwindow.h"
 
-#include <QVector3D>
-#include <QMatrix4x4>
+namespace Ui {
+class FormHier;
+}
 
-class Camera
+class FormHier : public QDialog
 {
+    Q_OBJECT
+
+public slots:
+    void ReceiveSplitData();
+
 public:
-    Camera(const QVector3D &pos);
+    FormHier(QWidget *parent = nullptr);
+    ~FormHier();
+    Ui::FormHier *ui;
 
-    void yaw(float degrees);
-    void pitch(float degrees);
-    void walk(float amount);
-    void strafe(float amount);
+public:
+    //MyDataSet *dataset = nullptr;
 
-    QMatrix4x4 viewMatrix() const;
+public:
+    //void setMyDataSet(MyDataSet * dataset_){ this->dataset = dataset_;}
+    //void testMyData();
 
-private:
-    QVector3D m_forward;
-    QVector3D m_right;
-    QVector3D m_up;
-    QVector3D m_pos;
-    float m_yaw;
-    float m_pitch;
-    QMatrix4x4 m_yawMatrix;
-    QMatrix4x4 m_pitchMatrix;
 };
 
-#endif
+#endif // FORMHIER_H
