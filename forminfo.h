@@ -1,33 +1,26 @@
-// Copyright (C) 2017 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+#ifndef FORMINFO_H
+#define FORMINFO_H
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#include <QDialog>
 
-#include <QVector3D>
-#include <QMatrix4x4>
+namespace Ui {
+class FormInfo;
+}
 
-class Camera
+class FormInfo : public QDialog
 {
+    Q_OBJECT
+
 public:
-    Camera(const QVector3D &pos);
+    explicit FormInfo(QWidget *parent = nullptr);
+    ~FormInfo();
 
-    void yaw(float degrees);
-    void pitch(float degrees);
-    void walk(float amount);
-    void strafe(float amount);
-
-    QMatrix4x4 viewMatrix() const;
+public slots:
+    void setPointX(float value);
 
 private:
-    QVector3D m_forward;
-    QVector3D m_right;
-    QVector3D m_up;
-    QVector3D m_pos;
-    float m_yaw;
-    float m_pitch;
-    QMatrix4x4 m_yawMatrix;
-    QMatrix4x4 m_pitchMatrix;
+    Ui::FormInfo *ui;
+    float pointX = 0;
 };
 
-#endif
+#endif // FORMINFO_H
