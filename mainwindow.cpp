@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "mydataset.h"
+//#include "mydataset.h"
+#include "all_data.h"
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QIODevice>
@@ -40,7 +41,9 @@ MainWindow::MainWindow(VulkanWindow *w)
     formTop = new FormTop;
     formInfo = new FormInfo;
     formMap = new FormMap;
-    donut = new MyDataSet;
+    donut = new all_data;
+
+    //all_data donut;
 
     dockHier->setWidget(formHier);
     dockLayer->setWidget(formLayer);
@@ -51,7 +54,10 @@ MainWindow::MainWindow(VulkanWindow *w)
 
     //QObject::connect(this, sendInfoValue, formInfo, FormInfo::setPointX);
     QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), this, SLOT(on_actionOpen_file_triggered));
-    QObject::connect(this, SIGNAL(on_actionOpen_file_triggered), donut, SLOT(file_split));
+    QObject::connect(this, SIGNAL(sendSelectFileName(QString)), donut, SLOT(receiveSelectFileName(QString)));
+    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int)), formHier, SLOT(ReceiveSplitData(QStringList, int, int)));
+
+    //QObject::connect(this, SIGNAL(sendSelectFileName(QString)), formHier, SLOT(ReceiveSplitData()));
     //QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), formHier, SLOT(ReceiveSplitData()));
 
     //qDebug() << split_data[1][0];
@@ -283,31 +289,9 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_actionOpen_file_triggered()
 {
 
-    QStringList file_name = QFileDialog::getOpenFileNames(this, "파일 선택","C:\\","Files(*.*)");
-    qDebug() << file_name;
+    QString file_name = QFileDialog::getOpenFileName(this, "파일 선택","C:\\","Files(*.*)");
+    //qDebug() << file_name;
 
-    int row = 0;
-
-    QFile file(file_name);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
-    QString getLine;
-    QStringList list[100];
-    QTextStream fileStream(&file);
-    QRegExp rx("[,]");
-    while (!fileStream.atEnd()) {
-            getLine.append(fileStream.readLine());
-            getLine.append(",");
-            list[row] << (getLine.split(rx, QString::SkipEmptyParts));
-            for (int column=0;column<17;column++)
-            {
-                split_data[row][column] << list[row][column];
-                //emit sendSplitData(split_data[row][column]);
-                //qDebug() << "row = " << row << split_data[row][column];
-            }
-            row++;
-            getLine.clear();
-    }
-
+    emit sendSelectFileName(file_name);
 
 }
