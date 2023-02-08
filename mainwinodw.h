@@ -11,8 +11,9 @@
 #include "formtop.h"
 #include "forminfo.h"
 #include "formmap.h"
+#include "all_data.h"
 
-#include "mydataset.h"
+//#include "mydataset.h"
 
 class VulkanWindow;
 
@@ -30,6 +31,8 @@ public:
     MainWindow(VulkanWindow *w);
     ~MainWindow();
 
+
+
 public slots:
 
     void inputStatus(QString text);
@@ -42,7 +45,7 @@ private slots:
 
 signals:
     void sendInfoValue(float value);
-    void sendSplitData(QStringList split_data);
+    void sendSelectFileName(QString file_name);
 
 public:
     QVulkanWindow *m_window;
@@ -53,7 +56,7 @@ public:
     FormTop *formTop;
     FormInfo *formInfo;
     FormMap *formMap;
-    MyDataSet *donut;
+    all_data *donut;
     QStringList split_data;
 
 
