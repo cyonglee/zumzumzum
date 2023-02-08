@@ -21,15 +21,21 @@ FormHier::~FormHier()
 //    this->dataset->split_datas[0][0] = QString("No, I'm not fool!!!");
 //}
 
-void FormHier::ReceiveSplitData()
+void FormHier::ReceiveSplitData(QStringList list, int row, int column)
 {
     qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxxx";
+    qDebug() << &list;
+    qDebug() << list[19];
+    qDebug() << row;
+    qDebug() << column;
+//    qDebug() << myVector.value(1);
 
 
+//    for ()
 
 
     ui->tableWidget->setColumnCount(20);
-    //ui->tableWidget->setHorizontalHeaderLabels(split_data[100][100]);
+    //ui->tableWidget->setHorizontalHeaderLabels(split_data[10][10]);
 
 
 
