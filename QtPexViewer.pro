@@ -16,6 +16,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    all_data.cpp \
     formhier.cpp \
     forminfo.cpp \
     formlayer.cpp \
@@ -23,17 +24,16 @@ SOURCES += \
     formtop.cpp \
     main.cpp \
     mainwindow.cpp \
-    mydataset.cpp \
     trianglerenderer.cpp
 
 HEADERS += \
+    all_data.h \
     formhier.h \
     forminfo.h \
     formlayer.h \
     formmap.h \
     formtop.h \
     mainwindow.h \
-    mydataset.h \
     trianglerenderer.h
 
 FORMS += \
