@@ -14,7 +14,8 @@ class FormHier : public QDialog
     Q_OBJECT
 
 public slots:
-    void ReceiveSplitData(QStringList list, int row, int column);
+    void ReceiveSplitData(int row, int column, const QVector <QVector <QString>> &inputDataVector);
+//    void ReceiveSplitData(QStringList list, int row, int column);
 
 public:
     FormHier(QWidget *parent = nullptr);
