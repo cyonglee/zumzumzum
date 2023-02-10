@@ -24,6 +24,9 @@ MainWindow::MainWindow(VulkanWindow *w)
     QDockWidget *dockInfo = new QDockWidget(tr("Camera Information"), this);
     QDockWidget *dockMap = new QDockWidget(tr("Map"), this);
 
+
+
+
     dockHier->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dockLayer->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dockTop->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
@@ -35,6 +38,9 @@ MainWindow::MainWindow(VulkanWindow *w)
     addDockWidget(Qt::RightDockWidgetArea, dockTop);
     addDockWidget(Qt::RightDockWidgetArea, dockInfo);
     addDockWidget(Qt::RightDockWidgetArea, dockMap);
+
+    dockHier->resize(200,200);
+    dockLayer->resize(200,200);
 
     formHier = new FormHier;
     formLayer = new FormLayer;
@@ -55,7 +61,9 @@ MainWindow::MainWindow(VulkanWindow *w)
     //QObject::connect(this, sendInfoValue, formInfo, FormInfo::setPointX);
     QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), this, SLOT(on_actionOpen_file_triggered));
     QObject::connect(this, SIGNAL(sendSelectFileName(QString)), donut, SLOT(receiveSelectFileName(QString)));
-    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int)), formHier, SLOT(ReceiveSplitData(QStringList, int, int)));
+    QObject::connect(donut, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
+//    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int, QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(QStringList, int, int, QVector <QVector <QString>> &)));
+//    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int)), formHier, SLOT(ReceiveSplitData(QStringList, int, int)));
 
     //QObject::connect(this, SIGNAL(sendSelectFileName(QString)), formHier, SLOT(ReceiveSplitData()));
     //QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), formHier, SLOT(ReceiveSplitData()));
