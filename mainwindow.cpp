@@ -47,7 +47,7 @@ MainWindow::MainWindow(VulkanWindow *w)
     formTop = new FormTop;
     formInfo = new FormInfo;
     formMap = new FormMap;
-    donut = new all_data;
+    input_dataS = new all_data;
 
     //all_data donut;
 
@@ -60,8 +60,9 @@ MainWindow::MainWindow(VulkanWindow *w)
 
     //QObject::connect(this, sendInfoValue, formInfo, FormInfo::setPointX);
     QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), this, SLOT(on_actionOpen_file_triggered));
-    QObject::connect(this, SIGNAL(sendSelectFileName(QString)), donut, SLOT(receiveSelectFileName(QString)));
-    QObject::connect(donut, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
+    QObject::connect(this, SIGNAL(sendSelectFileName(QString)), input_dataS, SLOT(receiveSelectFileName(QString)));
+    QObject::connect(input_dataS, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
+    QObject::connect(input_dataS, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formLayer, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
 //    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int, QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(QStringList, int, int, QVector <QVector <QString>> &)));
 //    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int)), formHier, SLOT(ReceiveSplitData(QStringList, int, int)));
 
