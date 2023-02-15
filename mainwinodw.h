@@ -56,7 +56,7 @@ public:
     FormTop *formTop;
     FormInfo *formInfo;
     FormMap *formMap;
-    all_data *donut;
+    all_data *input_dataS;
     QStringList split_data;
 
 
