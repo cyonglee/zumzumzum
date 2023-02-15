@@ -12,15 +12,22 @@ FormHier::FormHier(QWidget *parent) :
     ui->setupUi(this);
     // QTableWidget defalut 크기 설정
     QStringList defalutTableHeader;
+    defalutTableHeader << "LayerName" << "LayerNum" << "LayerType" << "Red" << "Green" << "Blue";
 
-    ui->tableWidget->setColumnCount(5);
-    ui->tableWidget->setRowCount(5);
-    ui->tableWidget->setColumnWidth(0,50);
-    ui->tableWidget->setColumnWidth(1,50);
-    ui->tableWidget->setColumnWidth(2,50);
+    ui->tableWidget->setColumnCount(6);
+    ui->tableWidget->setRowCount(10);
+    ui->tableWidget->setColumnWidth(0,80);
+    ui->tableWidget->setColumnWidth(1,80);
+    ui->tableWidget->setColumnWidth(2,80);
     ui->tableWidget->setColumnWidth(3,50);
     ui->tableWidget->setColumnWidth(4,50);
     ui->tableWidget->setColumnWidth(5,50);
+    ui->tableWidget->setHorizontalHeaderLabels(defalutTableHeader);
+
+    ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section {background-color:#404040;color:#FFFFFF;}");
+
+//    tempcolor = ui->tableWidget->setBackgroundRole();
+//    ui->tableWidget->setHorizontalHeaderItem(0,QColor(128,128,128));
 
 }
 
@@ -36,13 +43,13 @@ FormHier::~FormHier()
 //void FormHier::ReceiveSplitData(QStringList list, int row, int column,  QVector <QVector <QString>> &inputDataVector)
 void FormHier::ReceiveSplitData(int row, int column, const QVector <QVector <QString>> &inputDataVector)
 {
-    qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxxx";
-    qDebug() << "row" << row;
-    qDebug() << "column" << column;
-    qDebug() << "1st" << inputDataVector.value(0);
-    qDebug() << "2nd" << inputDataVector.value(1);
-    qDebug() << "3rd" << inputDataVector.value(2);
-    qDebug() << "1st_1st" << inputDataVector.value(0).value(0);
+//    qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxxx";
+//    qDebug() << "row" << row;
+//    qDebug() << "column" << column;
+//    qDebug() << "1st" << inputDataVector.value(0);
+//    qDebug() << "2nd" << inputDataVector.value(1);
+//    qDebug() << "3rd" << inputDataVector.value(2);
+//    qDebug() << "1st_1st" << inputDataVector.value(0).value(0);
 
 // QTableWidget 에서 QStringList 로만 받기때문에 자료형변환
     QStringList vectorTOqstringlist;
@@ -70,6 +77,7 @@ void FormHier::ReceiveSplitData(int row, int column, const QVector <QVector <QSt
         }
 
     }
+//    ui->tableWidget->set;
 //    ui->tableWidget->setColumnWidth(0,80);
 //    ui->tableWidget->setColumnWidth(1,80);
 //    ui->tableWidget->setColumnWidth(2,80);
