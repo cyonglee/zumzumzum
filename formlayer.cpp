@@ -1,4 +1,5 @@
 #include "formlayer.h"
+#include "all_data.h"
 #include "ui_formlayer.h"
 #include "mainwindow.h"
 #include <QDebug>
@@ -20,6 +21,11 @@ FormLayer::FormLayer(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(defalutTableHeader);
 
     ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section {background-color:#404040;color:#FFFFFF;}");
+
+
+
+
+
 }
 
 FormLayer::~FormLayer()
@@ -37,6 +43,8 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
 //    qDebug() << "2nd" << inputDataVector.value(1);
 //    qDebug() << "3rd" << inputDataVector.value(2);
 //    qDebug() << "1st_1st" << inputDataVector.value(0).value(0);
+
+
 
 // QTableWidget 에서 QStringList 로만 받기때문에 자료형변환
     QStringList vectorTOqstringlist;
@@ -77,11 +85,41 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
     }
 
     ui->tableWidget->setHorizontalHeaderLabels(vectorTOqstringlistHoriLabels);
+
+    QObject::connect(this,SIGNAL(&QTableWidget::itemChaged),this,SLOT(on_tableWidget_itemChanged));
 }
+
+
 
 
 
 void FormLayer::on_tableWidget_itemChanged(QTableWidgetItem *checkBoxItem)
 {
 
+    qDebug() << checkBoxItem->row();
+
+//    qDebug() << ui->tableWidget->rowCount();
+//    qDebug() << ui->tableWidget->columnCount();
+
+//    QStringList temp;
+//    temp << "aaa" << "bbb" << "ccc";
+//    qDebug() << temp[1];
+
+
+
+//    QTableWidgetItem *xxx = ui->tableWidget->item(1,1);
+//    QString temp = xxx;
+//    qDebug() << xxx;
+
+
+//    qDebug() << ui->tableWidget->;
+
+//    QString value = ui->tableWidget->item(0,0)->text();
+//    qDebug() << value;
+
+
+
+
 }
+
+
