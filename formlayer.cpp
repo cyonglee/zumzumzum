@@ -1,8 +1,7 @@
 #include "formlayer.h"
-#include "all_data.h"
 #include "ui_formlayer.h"
-#include "mainwindow.h"
 #include <QDebug>
+
 
 
 FormLayer::FormLayer(QWidget *parent) :
@@ -21,8 +20,6 @@ FormLayer::FormLayer(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(defalutTableHeader);
 
     ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section {background-color:#404040;color:#FFFFFF;}");
-
-
 
 
 
@@ -86,7 +83,9 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
 
     ui->tableWidget->setHorizontalHeaderLabels(vectorTOqstringlistHoriLabels);
 
+
     QObject::connect(this,SIGNAL(&QTableWidget::itemChaged),this,SLOT(on_tableWidget_itemChanged));
+
 }
 
 
@@ -95,31 +94,18 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
 
 void FormLayer::on_tableWidget_itemChanged(QTableWidgetItem *checkBoxItem)
 {
+    int clickedRow = checkBoxItem->row();
 
-    qDebug() << checkBoxItem->row();
+    qDebug() << clickedRow;
 
-//    qDebug() << ui->tableWidget->rowCount();
-//    qDebug() << ui->tableWidget->columnCount();
+    QTableWidgetItem *item = ui->tableWidget->item(clickedRow,1);
 
-//    QStringList temp;
-//    temp << "aaa" << "bbb" << "ccc";
-//    qDebug() << temp[1];
-
-
-
-//    QTableWidgetItem *xxx = ui->tableWidget->item(1,1);
-//    QString temp = xxx;
-//    qDebug() << xxx;
-
-
-//    qDebug() << ui->tableWidget->;
-
-//    QString value = ui->tableWidget->item(0,0)->text();
-//    qDebug() << value;
-
-
+    if (item != nullptr) {
+       QString cellValue = item->text();
+        qDebug() << "Cell value at (1, 1):" << cellValue;
+    } else {
+        qDebug() << "No item at (1, 1)";
+    }
 
 
 }
-
-
