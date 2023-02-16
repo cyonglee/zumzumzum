@@ -21,11 +21,13 @@ public slots:
 public:
     explicit FormLayer(QWidget *parent = nullptr);
     ~FormLayer();
+    int row;
+    int column;
 //    QTableWidgetItem *checkBoxItem[3];
 
 
 private slots:
-    void on_tableWidget_itemChanged(QTableWidgetItem *item);
+    void on_tableWidget_itemChanged(QTableWidgetItem *checkBoxItem);
 
 private:
     Ui::FormLayer *ui;
