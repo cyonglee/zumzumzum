@@ -2,10 +2,15 @@
 #define FORMLAYER_H
 
 #include <QDialog>
+#include <QColorDialog>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QCheckBox>
+#include <QPushButton>
+#include <QDebug>
+
 
 namespace Ui {
 class FormLayer;
@@ -21,16 +26,23 @@ public slots:
 public:
     explicit FormLayer(QWidget *parent = nullptr);
     ~FormLayer();
+    int i;
     int row;
     int column;
+
 //    QTableWidgetItem *checkBoxItem[3];
 
 
 private slots:
-    void on_tableWidget_itemChanged(QTableWidgetItem *checkBoxItem);
+    void on_tableWidget_itemChanged();
+    void on_colorbutton_clicked();
 
 private:
     Ui::FormLayer *ui;
+
+signals:
+    void outputLayerStatus(QString printLayer);
+
 };
 
 #endif // FORMLAYER_H
