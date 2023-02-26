@@ -125,19 +125,42 @@ void FormLayer::tableWidget_checkBoxChanged()
     if (!checkboxInTable)
         return;
 
-
-    QPoint checkboxPos = checkboxInTable->mapTo(ui->tableWidget, QPoint(0, 0));
-
-    int row = ui->tableWidget->indexAt(checkboxPos).row();
-    int column = ui->tableWidget->indexAt(checkboxPos).column();
-
-    if (checkboxInTable->isChecked()) {
-        qDebug() << "Checkbox at row" << row << "column" << column << "is checked.";
-    } else {
-        qDebug() << "Checkbox at row" << row << "column" << column << "is unchecked.";
+    int checkboxrow = -1;
+    for (int i = 0; i < ui->tableWidget->rowCount(); i++) {
+        QWidget *widget = ui->tableWidget->cellWidget(i, 0);
+        QCheckBox *checkbox = widget->findChild<QCheckBox*>();
+        if (checkbox == checkboxInTable) {
+            checkboxrow = i;
+            break;
+        }
     }
 
+    if (checkboxrow == -1) {
+        qDebug() << "Failed to find row and column for checkbox.";
+        return;
+    }
+
+    if (checkboxInTable->isChecked()) {
+        qDebug() << "Checkbox at row" << checkboxrow << "is checked.";
+    } else {
+        qDebug() << "Checkbox at row" << checkboxrow << "is unchecked.";
+    }
+
+
+
+//    QPoint checkboxPos = checkboxInTable->mapTo(ui->tableWidget, QPoint(0, 0));
+
+//    int row = ui->tableWidget->indexAt(checkboxPos).row();
+//    int column = ui->tableWidget->indexAt(checkboxPos).column();
+
+//    if (checkboxInTable->isChecked()) {
+//        qDebug() << "Checkbox at row" << row << "column" << column << "is checked.";
+//    } else {
+//        qDebug() << "Checkbox at row" << row << "column" << column << "is unchecked.";
+//    }
+
 }
+
 
 void FormLayer::on_colorbutton_clicked()
 {
