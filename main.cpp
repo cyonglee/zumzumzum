@@ -2,7 +2,10 @@
 
 #include <QApplication>
 #include <QVulkanInstance>
-#include "mydataset.h"
+#include <fstream>
+#include <string>
+#include <iostream>
+#include "formtop.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,24 +32,46 @@ int main(int argc, char *argv[])
     VulkanWindow *vulkanWindow = new VulkanWindow;
     vulkanWindow->setVulkanInstance(&inst);
 
-    MainWindow mainWindow(vulkanWindow);
+    ////////////////////////////////////
+    std::ifstream readFile("C:/netlistLayout.txt");
+    QVector<QStringList> strVector;
+    QString qstr;
+    if (readFile.is_open())
+    {
+        int i = 0;
+        while(!readFile.eof())
+        {
+            std::string str;
+            getline(readFile, str);
+            qstr = QString::fromStdString(str);
+            QStringList listStr = qstr.split(",");
+            strVector.insert(i, listStr);
+            i++;
+ //           qDebug() << "qDebug : "<<qstr << "[ " << i << " ]";
+        }
+        readFile.close();
+    }
+    FormTop formTop;
+    formTop.receiveFile(strVector);
 
-    //MyDataSet my_data;
-
-    //mainWindow.setMyDataSet(&my_data);
-    //mainWindow.formHier->setMyDataSet(&my_data);
-
-    //qDebug() << "%%%%% " << my_data.split_datas[0][0];
-    //qDebug() << "%%%%% " << mainWindow.dataset->split_datas[0][0];
-    //qDebug()<< "%%%%% before " << mainWindow.formHier->dataset->split_datas[0][0];
-    //mainWindow.formHier->testMyData();
-    //qDebug()<< "%%%%% after " << mainWindow.formHier->dataset->split_datas[0][0];
+//    for (int j = 0; j < 32; j++)
+//    {
+//        qDebug() << "count : "<< j << " | len : " << strVector[j].size();
+//        qDebug() << strVector[j];
+//    }
+    //////////////////////////////////////
 
 
-    QObject::connect(vulkanWindow, &VulkanWindow::outputStatus, &mainWindow, &MainWindow::inputStatus);
-    //QObject::connect(vulkanWindow, &VulkanWindow::sendInfo, &mainWindow, &MainWindow::takeInfoValue);
-    mainWindow.resize(1024,768);
+    MainWindow mainWindow(vulkanWindow, strVector);
+    QObject::connect(vulkanWindow, &VulkanWindow::signalInfoText, &mainWindow, &MainWindow::slotInfoText);
+
+    QRect size = mainWindow.geometry();
+    mainWindow.shareGeo(size);
+    qDebug() << "Main geo : " << mainWindow.geometry();
+
     mainWindow.show();
+
+
 
 
 
