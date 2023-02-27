@@ -1,75 +1,83 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-//#include "mydataset.h"
-#include "all_data.h"
+
 #include <QMouseEvent>
 #include <QKeyEvent>
-#include <QIODevice>
-#include <QTextStream>
 #include <QDockWidget>
+#include <QGraphicsRectItem>
+#include <QGraphicsOpacityEffect>
+#include <QFile>
 #include <QFileDialog>
 #include <QString>
 
-MainWindow::MainWindow(VulkanWindow *w)
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <QIODevice>
+#include <QTextStream>
+
+MainWindow::MainWindow(VulkanWindow *w, QVector<QStringList> strVector)
     : m_window(w)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     QWidget *wrapper = QWidget::createWindowContainer(w);
-    ui->verticalLayout_2->addWidget(wrapper);
+    ui->graphicsView->setViewport(wrapper);
 
     QDockWidget *dockHier = new QDockWidget(tr("Hierarchy"), this);
-    QDockWidget *dockLayer = new QDockWidget(tr("Layer Information"), this);
-    QDockWidget *dockTop = new QDockWidget(tr("GDS View"), this);
-    QDockWidget *dockInfo = new QDockWidget(tr("Camera Information"), this);
-    QDockWidget *dockMap = new QDockWidget(tr("Map"), this);
-
-
-
-
     dockHier->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockLayer->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockTop->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockInfo->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dockMap->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-
-    addDockWidget(Qt::LeftDockWidgetArea, dockHier);
-    addDockWidget(Qt::LeftDockWidgetArea, dockLayer);
-    addDockWidget(Qt::RightDockWidgetArea, dockTop);
-    addDockWidget(Qt::RightDockWidgetArea, dockInfo);
-    addDockWidget(Qt::RightDockWidgetArea, dockMap);
-
-    dockHier->resize(200,200);
-    dockLayer->resize(200,200);
-
+    dockHier->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addDockWidget(Qt::RightDockWidgetArea, dockHier);
     formHier = new FormHier;
-    formLayer = new FormLayer;
-    formTop = new FormTop;
-    formInfo = new FormInfo;
-    formMap = new FormMap;
-    input_dataS = new all_data;
-
-    //all_data donut;
-
     dockHier->setWidget(formHier);
+
+    QDockWidget *dockLayer = new QDockWidget(tr("Layer Information"), this);
+    dockLayer->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockLayer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addDockWidget(Qt::RightDockWidgetArea, dockLayer);
+    formLayer = new FormLayer;
     dockLayer->setWidget(formLayer);
-    dockTop->setWidget(formTop);
-    dockInfo->setWidget(formInfo);
+
+    QDockWidget *dockMap = new QDockWidget(tr("Map"), this);
+    dockMap->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockMap->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addDockWidget(Qt::LeftDockWidgetArea, dockMap);
+    formMap = new FormMap;
+    formMap->receiveFile(strVector);
     dockMap->setWidget(formMap);
 
+    QDockWidget *dockTop = new QDockWidget(tr("Topview"), this);
+    dockTop->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockTop->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addDockWidget(Qt::LeftDockWidgetArea, dockTop);
+    formTop = new FormTop;
+    formTop->receiveFile(strVector);
+    dockTop->setWidget(formTop);
 
-    //QObject::connect(this, sendInfoValue, formInfo, FormInfo::setPointX);
+    QDockWidget *dockInfo = new QDockWidget(tr("Info"), this);
+    dockInfo->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dockInfo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addDockWidget(Qt::LeftDockWidgetArea, dockInfo);
+    formInfo = new FormInfo;
+    dockInfo->setWidget(formInfo);
+
+    resizeDocks({dockInfo, dockTop, dockMap, dockLayer, dockHier}, {200,200}, Qt::Horizontal);
+    resizeDocks({dockTop, dockMap}, {200,200}, Qt::Vertical);
+
+    input_dataS = new all_data;
+
     QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), this, SLOT(on_actionOpen_file_triggered));
     QObject::connect(this, SIGNAL(sendSelectFileName(QString)), input_dataS, SLOT(receiveSelectFileName(QString)));
     QObject::connect(input_dataS, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
     QObject::connect(input_dataS, SIGNAL(sendSplitData(int, int, const QVector <QVector <QString>> &)), formLayer, SLOT(ReceiveSplitData(int, int, const QVector <QVector <QString>> &)));
-//    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int, QVector <QVector <QString>> &)), formHier, SLOT(ReceiveSplitData(QStringList, int, int, QVector <QVector <QString>> &)));
-//    QObject::connect(donut, SIGNAL(sendSplitData(QStringList, int, int)), formHier, SLOT(ReceiveSplitData(QStringList, int, int)));
+    QObject::connect(formLayer, SIGNAL(outputLayerStatus(QString)), this, SLOT(inputLayerStatus(QString)));
 
-    //QObject::connect(this, SIGNAL(sendSelectFileName(QString)), formHier, SLOT(ReceiveSplitData()));
-    //QObject::connect(ui->actionOpen_file, SIGNAL(triggered()), formHier, SLOT(ReceiveSplitData()));
+}
 
-    //qDebug() << split_data[1][0];
+void MainWindow::shareGeo(QRect size)
+{
+    QRect windowSize = size;
+    qDebug() << "shareGeo : " << windowSize;
 }
 
 
@@ -78,9 +86,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::inputStatus(QString text)
+void MainWindow::slotInfoText(QString funcName, float value)
 {
+    formInfo->slotInfoText(funcName,value);
+    formMap->slotInfoText(funcName,value);
+    qDebug() << "slotInfoText" << value;
+///// temp //////
+    QString text = funcName + " : " + QString::number(value);
     for (int i = text.size() ; i < 30 ; i++)
     {
         text.append(" ");
@@ -91,7 +103,9 @@ void MainWindow::inputStatus(QString text)
     if (statusText.size() > 120)
         statusText.remove(120,statusText.size()-120);
     ui->statusbar->showMessage(statusText);
+
 }
+
 
 QVulkanWindowRenderer *VulkanWindow::createRenderer()
 {
@@ -115,16 +129,18 @@ void VulkanWindow::wheelEvent(QWheelEvent *e)
     if (keyCtrl == true)
     {
 //      m_rendere->windowZoom(amount);
-        QString funcValue = "windowZoom : " + QString::number(amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        QString funcName = "windowZoom";
+        float value = amount;
+        emit signalInfoText(funcName, value);
+//        qDebug()<<funcName << " : " << value;
     }
     else
     {
 //      m_renderer->moveZoom(amount);
-        QString funcValue = "moveZoom : " + QString::number(amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        QString funcName = "moveZoom";
+        float value = amount;
+        emit signalInfoText(funcName, value);
+//        qDebug()<<funcName << " : " << value;
     }
 }
 
@@ -132,14 +148,14 @@ void VulkanWindow::mousePressEvent(QMouseEvent *e)
 {
     m_mouseButton = e->buttons();
     m_lastPos = e->pos();
-    qDebug() << m_mouseButton;
-    qDebug() << m_lastPos;
 }
 
 void VulkanWindow::mouseReleaseEvent(QMouseEvent *)
 {
     m_mouseButton = 0;
-    qDebug() << m_mouseButton;
+    QString funcName = "mouseRelease";
+    float value = 0;
+    emit signalInfoText(funcName, value);
 }
 
 void VulkanWindow::mouseMoveEvent(QMouseEvent *e)
@@ -155,16 +171,18 @@ void VulkanWindow::mouseMoveEvent(QMouseEvent *e)
         if (m_mouseButton == 2)
         {
 //            m_renderer->rotateRenderY(dx / 10.0f);
-            QString funcValue = "rotateRenderX : " + QString::number(dx / 10.0f);
-            emit outputStatus(funcValue);
-            qDebug()<<funcValue;
+            QString funcName = "rotateRenderX";
+            float value = -dx / 10.0f;
+            emit signalInfoText(funcName, value);
+            qDebug()<< "mouseEvent "<<funcName << " : " << value;
         }
         else if (m_mouseButton == 4)
         {
 //            m_renderer->moveRenderX(dx / 10.0f);
-            QString funcValue = "moveRenderX : " + QString::number(dx / 10.0f);
-            emit outputStatus(funcValue);
-            qDebug()<<funcValue;
+            QString funcName = "moveRenderX";
+            float value = -dx / 10.0f;
+            emit signalInfoText(funcName, value);
+//            qDebug()<<funcName << " : " << value;
         }
     }
 
@@ -173,16 +191,18 @@ void VulkanWindow::mouseMoveEvent(QMouseEvent *e)
         if (m_mouseButton == 2)
         {
 //            m_renderer->rotateRenderY(dy / 10.0f);
-            QString funcValue = "rotateRenderY : " + QString::number(dy / 10.0f);
-            emit outputStatus(funcValue);
-            qDebug()<<funcValue;
+            QString funcName = "rotateRenderY";
+            float value = dy / 10.0f;
+            emit signalInfoText(funcName, value);
+//            qDebug()<<funcName << " : " << value;
         }
         else if (m_mouseButton == 4)
         {
 //            m_renderer->moveRenderY(dy / 10.0f);
-            QString funcValue = "moveRenderY : " + QString::number(dy / 10.0f);
-            emit outputStatus(funcValue);
-            qDebug()<<funcValue;
+            QString funcName = "moveRenderY";
+            float value = dy / 10.0f;
+            emit signalInfoText(funcName, value);
+//            qDebug()<<funcName << " : " << value;
         }
     }
 }
@@ -190,44 +210,38 @@ void VulkanWindow::mouseMoveEvent(QMouseEvent *e)
 void VulkanWindow::keyPressEvent(QKeyEvent *e)
 {
     const float amount = e->modifiers().testFlag(Qt::ShiftModifier) ? 1.0f : 0.1f;
-    QString funcValue;
+    QString funcName;
+    float value = 0;
     switch (e->key()) {
     case Qt::Key_Up:
-//        m_renderer->moveGdsY(amount);
-        funcValue = "moveGdsY : " + QString::number(amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsY";
+        value = amount;
+//        m_renderer->moveGdsY(value);
         break;
     case Qt::Key_Down:
-//        m_renderer->moveGdsY(-amount);
-        funcValue = "moveGdsY : " + QString::number(-amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsY";
+        value = -amount;
+//        m_renderer->moveGdsY(value);
         break;
     case Qt::Key_Right:
-//        m_renderer->moveGdsX(-amount);
-        funcValue = "moveGdsX : " + QString::number(amount);
-//        emit sendInfo("moveGdsX", -amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsX";
+        value = amount;
+//        m_renderer->moveGdsX(value);
         break;
     case Qt::Key_Left:
-//        m_renderer->moveGdsX(amount);
-        funcValue = "moveGdsX : " + QString::number(-amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsX";
+        value = -amount;
+//        m_renderer->moveGdsX(value);
         break;
     case Qt::Key_PageUp:
-//        m_renderer->moveGdsZ(amount);
-        funcValue = "moveGdsZ : " + QString::number(amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsZ";
+        value = amount;
+//        m_renderer->moveGdsZ(value);
         break;
     case Qt::Key_PageDown:
-//        m_renderer->moveGdsZ(amount);
-        funcValue = "moveGdsZ : " + QString::number(-amount);
-        emit outputStatus(funcValue);
-        qDebug()<<funcValue;
+        funcName = "moveGdsZ";
+        value = -amount;
+//        m_renderer->moveGdsZ(value);
         break;
     case Qt::Key_Control:
         keyCtrl = true;
@@ -244,6 +258,8 @@ void VulkanWindow::keyPressEvent(QKeyEvent *e)
     default:
         break;
     }
+    emit signalInfoText(funcName, value);
+    qDebug()<<funcName << " : " << value;
 }
 void VulkanWindow::keyReleaseEvent(QKeyEvent *e)
 {
@@ -265,35 +281,27 @@ void VulkanWindow::keyReleaseEvent(QKeyEvent *e)
     }
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_actionOpen_Map_File_triggered()
 {
-    if (formHier->isVisible())
+    QString fileNameInfo = QFileDialog::getOpenFileName(this,
+                                                        tr("Open map file"),
+                                                        "C:/",
+                                                        tr("text (*.txt)")
+                                                        );
+    FileDb *fileDb = new FileDb;
+    QVector<QVector<QVector<QList<float>>>> mapFile;
+    mapFile = fileDb->openFile(fileNameInfo);
+    for(int i = 0 ; i < (int(mapFile[0][0][0][2]*1000)-int(mapFile[0][0][0][0]*1000))/10+1 ; i++)
     {
-        formHier->close();
-        formLayer->close();
-        formTop->close();
-        formInfo->close();
-        formMap->close();
-    }
-    else
-    {
-        formHier->show();
-        formLayer->show();
-        formTop->show();
-        formInfo->show();
-        formMap->show();
+        QDebug oneLine = qDebug();
+        for(int j = 0 ; j < (int(mapFile[0][0][0][3]*1000)-int(mapFile[0][0][0][1]*1000))/10+1 ; j++)
+        {
+            oneLine << "["<<i<<"]["<<j<<"] "<<mapFile[i][j];
+        }
+        qDebug() << "";
     }
 
 }
-
-/*void MainWindow::takeInfoValue(QString infoName, float value)
-{
-    qDebug()<<"takeInfoValue";
-    emit sendInfoValue(value);
-
-
-}
-*/
 
 void MainWindow::on_actionOpen_file_triggered()
 {
@@ -303,4 +311,10 @@ void MainWindow::on_actionOpen_file_triggered()
 
     emit sendSelectFileName(file_name);
 
+}
+
+
+void MainWindow::inputLayerStatus(QString text)
+{
+    ui->statusbar->showMessage(text);
 }
