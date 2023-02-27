@@ -11,43 +11,41 @@
 #include "formtop.h"
 #include "forminfo.h"
 #include "formmap.h"
+#include "filedb.h"
 #include "all_data.h"
-
-//#include "mydataset.h"
+#include <QVector>
 
 class VulkanWindow;
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui { class MainWindow; class LayerForm; }
 QT_END_NAMESPACE
-
-
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(VulkanWindow *w);
+    MainWindow(VulkanWindow *w, QVector<QStringList> strVector);
     ~MainWindow();
 
-
+    void shareGeo(QRect size);
 
 public slots:
 
-    void inputStatus(QString text);
+    void slotInfoText(QString funcName, float value);
+    void inputLayerStatus(QString text);
     void on_actionOpen_file_triggered();
 
-//    void takeInfoValue(QString infoName, float value);
-
-private slots:
-    void on_pushButton_clicked();
-
 signals:
-    void sendInfoValue(float value);
+    void signalInfoText(QString funcName, float value);
     void sendSelectFileName(QString file_name);
 
-public:
+
+private slots:
+    void on_actionOpen_Map_File_triggered();
+
+private:
     QVulkanWindow *m_window;
     Ui::MainWindow *ui;
     QString statusText;
@@ -56,19 +54,12 @@ public:
     FormTop *formTop;
     FormInfo *formInfo;
     FormMap *formMap;
+    SuperItem *superItem;
+    QRect *windowSize;
+    FileDb *fileDb;
     all_data *input_dataS;
     QStringList split_data;
-
-
-public:
-    //MyDataSet *dataset = nullptr;
-
-public:
-    //void setMyDataSet(MyDataSet * dataset_){ this->dataset = dataset_;}
-
 };
-
-
 
 // Graphics output
 class VulkanRenderer : public TriangleRenderer
@@ -104,10 +95,8 @@ private:
 
     QPoint m_lastPos;
 
-
 signals:
-    void outputStatus(QString funcValue);
-    void sendInfo(QString infoName, float value);
+    void signalInfoText(QString funcName, float value);
 };
 
 
