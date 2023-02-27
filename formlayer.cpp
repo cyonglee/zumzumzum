@@ -19,6 +19,21 @@ FormLayer::FormLayer(QWidget *parent) :
     ui->tableWidget->setHorizontalHeaderLabels(defalutTableHeader);
     ui->tableWidget->horizontalHeader()->setStyleSheet("QHeaderView::section {background-color:#404040;color:#FFFFFF;}");
 
+    QHeaderView *header = ui->tableWidget->horizontalHeader();
+    header->setSectionResizeMode(QHeaderView::Stretch);
+
+    QCheckBox *HeadercheckBoxItem = new QCheckBox(header);
+    HeadercheckBoxItem->setCheckState(Qt::Checked);
+//    header->setC
+
+//    QWidget *HeadercheckboxWidget = new QWidget();
+//    QHBoxLayout *checkboxLayout = new QHBoxLayout(HeadercheckboxWidget);
+//    checkboxLayout->addWidget(HeadercheckBoxItem);
+//    checkboxLayout->setAlignment(Qt::AlignCenter);
+//    checkboxLayout->setContentsMargins(0,0,0,0);
+//    HeadercheckboxWidget->setLayout(checkboxLayout);
+//    ui->tableWidget->setCellWidget(0,0,HeadercheckboxWidget);
+
 
 }
 
@@ -65,7 +80,6 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
             vectorTOqstringlist << inputDataVector.value(i+1).value(j);
 //            vectorTOqstringlistHoriLabels << inputDataVector.value(0).value(j+1);
             ui->tableWidget->setItem(i,j+2,new QTableWidgetItem(vectorTOqstringlist[i*(column-3)+j]));
-            qDebug() << "column : " << column;
         }
 
         // checkbox 채우기
@@ -116,7 +130,6 @@ void FormLayer::ReceiveSplitData(int row, int column, const QVector <QVector <QS
 /// \param checkBoxItem
 /// description : checkbox 선택에 따라 Layer On/Off mainwindow status 창에 출력
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 void FormLayer::tableWidget_checkBoxChanged()
 {
     qDebug() << "xxxxxxxxxxxxxxxxxxxxxxxzzzzzzzzzzzzzzzzzzzzz";
@@ -140,27 +153,51 @@ void FormLayer::tableWidget_checkBoxChanged()
         return;
     }
 
+    QTableWidgetItem *readcheckbox = ui->tableWidget->item(checkboxrow,2);
+    QString selectedLayer = readcheckbox->text();
+    QString printLayer = "selectedLayer = " + selectedLayer;
+
+
+
     if (checkboxInTable->isChecked()) {
+        printLayer = printLayer + "  Layer  On";
+        emit outputLayerStatus(printLayer);
         qDebug() << "Checkbox at row" << checkboxrow << "is checked.";
     } else {
+        printLayer = printLayer + "  Layer  Off";
+        emit outputLayerStatus(printLayer);
         qDebug() << "Checkbox at row" << checkboxrow << "is unchecked.";
     }
 
-
-
-//    QPoint checkboxPos = checkboxInTable->mapTo(ui->tableWidget, QPoint(0, 0));
-
-//    int row = ui->tableWidget->indexAt(checkboxPos).row();
-//    int column = ui->tableWidget->indexAt(checkboxPos).column();
-
-//    if (checkboxInTable->isChecked()) {
-//        qDebug() << "Checkbox at row" << row << "column" << column << "is checked.";
-//    } else {
-//        qDebug() << "Checkbox at row" << row << "column" << column << "is unchecked.";
-//    }
-
 }
 
+
+//void FormLayer::on_tableWidget_itemChanged()
+//{
+//    int clickedRow = ui->tableWidget->currentRow();
+//    qDebug() << clickedRow;
+//    QTableWidgetItem *item = ui->tableWidget->item(clickedRow,2);
+
+//    if (item != nullptr) {
+//        QString selectedLayer = item->text();
+//        QString printLayer = "selectedLayer = " + selectedLayer;
+
+//        bool LayerOnOff = ui->tableWidget->cellWidget(clickedRow,0)->windowState();
+//        qDebug() << LayerOnOff;
+//        if (LayerOnOff==true){
+//            printLayer = printLayer + "  Layer  On";
+//            emit outputLayerStatus(printLayer);
+//            qDebug() << printLayer;
+//        } else {
+//            printLayer = printLayer + "  Layer  Off";
+//            emit outputLayerStatus(printLayer);
+//            qDebug() <<  printLayer;
+//        }
+
+//    } else {
+//        qDebug() << "No item";
+//    }
+//}
 
 void FormLayer::on_colorbutton_clicked()
 {
