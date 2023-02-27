@@ -34,7 +34,7 @@ public:
 
 
 private slots:
-    void on_tableWidget_itemChanged();
+    void tableWidget_checkBoxChanged();
     void on_colorbutton_clicked();
 
 private:
